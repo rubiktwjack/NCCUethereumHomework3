@@ -34,9 +34,13 @@ router.get("/allBalance", async function(req, res, next) {
   let bankBalance = await bank.methods
     .getBankBalance()
     .call({ from: req.query.account });
+  let coinBalance = await bank.methods
+    .getCoinBalance()
+    .call({ from: req.query.account });
   res.send({
     ethBalance: ethBalance,
-    bankBalance: bankBalance
+    bankBalance: bankBalance,
+    coinBalance: coinBalance
   });
 });
 
@@ -160,6 +164,12 @@ router.get("/owner", async function(req, res, next) {
   bank.options.address = req.query.address;
 
   res.send(await bank.methods.getOwner().call());
+  //    .on('receipt', function (receipt) {
+  //      res.send(receipt);
+  //    })
+  //    .on('error', function (error) {
+  //      res.send(error.toString());
+  //   })
 });
 
 //mint Coin
@@ -203,6 +213,7 @@ router.post("/buyCoin", function(req, res, next) {
 //transfer Coin
 router.post("/transferCoin", function(req, res, next) {
   // TODO
+  // ...
   let bank = new web3.eth.Contract(contract.abi);
   bank.options.address = req.body.address;
   bank.methods
@@ -222,6 +233,7 @@ router.post("/transferCoin", function(req, res, next) {
 //transfer Owner
 router.post("/transferOwner", function(req, res, next) {
   // TODO
+  // ...
   let bank = new web3.eth.Contract(contract.abi);
   bank.options.address = req.body.address;
   bank.methods
@@ -239,13 +251,20 @@ router.post("/transferOwner", function(req, res, next) {
 });
 
 //transfer ether to other address
-router.post("/advtransferTo", async function(req, res, next) {
+router.post("/advTransferTo", async function(req, res, next) {
   // TODO
+
   let weiValue = web3.utils.toWei(req.body.value, "ether");
 
-  var GP = web3.eth.getGasPrice();
-  var amount = 120000 * GP;
-
+  var quantity = await web3.eth.estimateGas({
+    from: req.body.account,
+    to: req.body.to,
+    value: weiValue
+  });
+  console.log("大约要消耗gas：", quantity);
+  var amount = quantity * (await web3.eth.getGasPrice());
+  console.log("转出方的账户余额大约要减少：", amount, "(wei)");
+  // using the event emitter
   web3.eth
     .sendTransaction({
       from: req.body.account,
@@ -254,6 +273,7 @@ router.post("/advtransferTo", async function(req, res, next) {
     })
     .on("transactionHash", function(hash) {
       console.log("hash: " + hash);
+      //res.send(hash);
     })
     .on("receipt", function(receipt) {
       console.log("receipt: " + receipt);

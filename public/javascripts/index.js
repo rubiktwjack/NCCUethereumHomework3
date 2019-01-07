@@ -313,12 +313,13 @@ transferEtherButton.on("click", async function() {
 });
 
 // TODO
+
 checkOwnerButton.on("click", async function() {
   if (bankAddress == "") {
     return;
   }
 
-  //   解鎖
+  // 解鎖
   let unlock = await unlockAccount();
   if (!unlock) {
     return;
@@ -408,6 +409,7 @@ buyCoinButton.on("click", async function() {
     {
       address: bankAddress,
       account: nowAccount,
+      //to: transferEtherTo.val(),
       value: parseInt(buyCoinValue.val(), 10)
     },
     function(result) {
@@ -488,6 +490,7 @@ transferOwnerButton.on("click", async function() {
       address: bankAddress,
       account: nowAccount,
       to: transferOwnerTo.val()
+      //value: parseInt(buyCoinValue.val(), 10)
     },
     function(result) {
       if (result.events !== undefined) {
